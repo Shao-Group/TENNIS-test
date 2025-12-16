@@ -3,6 +3,7 @@
 input_gtf=$1
 tennis_gtf=$2
 truth_gtf=$3
+eval_output_prefix=$4
 
 psi_file=""
 chr_translate_file=""
@@ -44,7 +45,7 @@ done
 # gffcompare
 for i in $(ls  Rand*_run*.pred.gtf PSI*_run*.pred.gtf)
 do
-    gffcomapre -r $truth_gtf -o "${i%.pred.gtf}.eval" $i
+    gffcomapre -r $truth_gtf -o $eval_output_prefix."${i%.pred.gtf}.eval" $i
 done
 
 
