@@ -4,7 +4,7 @@ import os
 if len(sys.argv) >= 5:
     p = sys.argv[4]
     sys.path.insert(0, p)
-from GTF import get_PctIn
+from GTF import get_attr
 
 
 # get class code from .tmap
@@ -26,7 +26,7 @@ def get_class_code(tmap):
     return tid2class_code
 
 def precision_recall_curv(gtf, tmap, output_file=None):
-    tid2PctIn = get_PctIn(gtf)
+    tid2PctIn = get_attr(gtf, 'PctIn')
     tid2class_code = get_class_code(tmap)
     
     sorted_tid2PctIn = sorted(tid2PctIn.items(), key=lambda x: x[1], reverse=True)
