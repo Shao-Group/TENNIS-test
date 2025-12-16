@@ -3,19 +3,20 @@
 input_gtf=$1
 tennis_gtf=$2
 truth_gtf=$3
-translate_txt=$4
+chr_translate_file=$4
 eval_output_prefix=$5
 
-psi_file=""
-chr_translate_file=""
-tennis_test_dir=""
+tennis_test_dir=$6
+psi_file=$tennis_test_dir/"data/PSI_TABLE-dm6.tab"
+
+tennis_tmap=$7
 
 # 5 randoms
 for i in $(seq 1 5)
 do
-    $seed="--seed $i"
+    seed="--seed $i"
     if [[ $i -eq 1 ]]; then
-        $seed=""
+        seed=""
     fi 
     tennis test -f Random1 -x 100 \
         -p 0.0 \
@@ -36,7 +37,7 @@ for j in "1" "X"
 do
     tennis test -f PSI"$j" \
         -x 100 -p 0.0 \
-        -o PSI"$j"_run"$i" \
+        -o PSI"$j" \
         --psi_file $psi_file \
         --xi_gtf_file $tennis_gtf \
         --chr_translate_file $chr_translate_file \
@@ -44,25 +45,25 @@ do
 done
 
 # gffcompare
-for i in $(ls  Rand*_run*.pred.gtf PSI*_run*.pred.gtf)
+for i in Rand*_run*.pred.gtf PSI*.pred.gtf
 do
-    gffcomapre -r $truth_gtf -o "$eval_output_prefix"_"${i%.pred.gtf}"_eval $i
+    gffcompare -r $truth_gtf -o "$eval_output_prefix"_"${i%.pred.gtf}"_eval $i
 done
 
 
 # score TENNIS by PSI
 tennis test -f ScorePSI \
     -x 100000000 -p 0.0 \
-	-o TENNIS_SAT_psi_score \
-	--psi_file $psi_file \
-	--predicted_gtf $tennis_gtf \
-	--chr_translate_file $chr_translate_file \
-	$input_gtf
+    -o TENNIS_SAT_psi_score \
+    --psi_file $psi_file \
+    --predicted_gtf $tennis_gtf \
+    --chr_translate_file $chr_translate_file \
+    $input_gtf
 
 # TENNIS ROC by PctIn_x_PSI
 python $tennis_test_dir/scripts/precision_recall_by_pctIn.py \
     TENNIS_SAT_psi_score.scored.gtf \
-    $tennis_eval_tmap  \
+    $tennis_tmap  \
     pctIn_PSI_score  \
     x_score.txt
 
