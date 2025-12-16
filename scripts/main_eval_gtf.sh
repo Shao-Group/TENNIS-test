@@ -1,15 +1,21 @@
 #!/bin/bash
 
 input_gtf=$1
-tennis_gtf=$2
-truth_gtf=$3
-chr_translate_file=$4
-eval_output_prefix=$5
+truth_gtf=$2
+chr_translate_file=$3
+eval_output_prefix=$4
 
-tennis_test_dir=$6
+tennis_test_dir=$5
+
 psi_file=$tennis_test_dir/"data/PSI_TABLE-dm6.tab"
+tennis_gtf="TENNIS_SATSimple.pred.gtf"
 
-tennis_tmap=$7
+# rerun TENNIS
+tennis test -f SATSimple -m 4 --time_out 900  -x 100 \ 
+    -p 0.0 \
+    -o "TENNIS_SATSimple" \
+    $input_gtf
+
 
 # 5 randoms
 for i in $(seq 1 5)
@@ -50,6 +56,14 @@ do
     gffcompare -r $truth_gtf -o "$eval_output_prefix"_"${i%.pred.gtf}"_eval $i
 done
 
+# gffcompare for TENNIS + tmap
+tennis_eval_out="$eval_output_prefix"_"TENNIS"_eval
+gffcompare -r $truth_gtf -o $tennis_eval_out $tennis_gtf
+if [ -f $tennis_eval_out ]
+then
+    mv $tennis_eval_out $tennis_eval_out".stats"
+fi
+tennis_tmap="$tennis_eval_out"*TENNIS_SATSimple.pred.gtf.tmap
 
 # score TENNIS by PSI
 tennis test -f ScorePSI \
