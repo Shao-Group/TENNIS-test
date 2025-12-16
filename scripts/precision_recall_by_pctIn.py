@@ -25,17 +25,22 @@ def get_class_code(tmap):
     f.close()
     return tid2class_code
 
-def precision_recall_curv(gtf, tmap, output_file=None):
-    tid2PctIn = get_attr(gtf, 'PctIn')
+def precision_recall_curv(gtf, tmap, attr_name, output_file=None):
+    if attr_name == 'pctIn_PSI_score':
+        tid2attr = get_attr(gtf, 'PctIn', 'PSI_score')
+    else:
+        tid2attr = get_attr(gtf, attr_name)
     tid2class_code = get_class_code(tmap)
-    
-    sorted_tid2PctIn = sorted(tid2PctIn.items(), key=lambda x: x[1], reverse=True)
+
+    sorted_tid2attr = sorted(tid2attr.items(), key=lambda x: x[1], reverse=True)
     cur_total = 0
     cur_true  = 0
-    cur_pct   = 1
+    cur_pct   = None
     info = []
-    for k,v in sorted_tid2PctIn:
+    for k,v in sorted_tid2attr:
         cur_total += 1
+        if cur_pct is None:
+            cur_pct = v
         assert v <= cur_pct
         cur_pct = v
         if tid2class_code[k] == '=':
@@ -47,7 +52,7 @@ def precision_recall_curv(gtf, tmap, output_file=None):
     if output_file is None:
         output_file = 'precision_recall_info.txt'
     with open(output_file, 'w') as f:
-        f.write("\t".join(['PctIn', '#True', '%True', 'Total']) + "\n")
+        f.write("\t".join([attr_name, '#True', '%True', 'Total']) + "\n")
         for line in info:
             l = '\t'.join([str(x) for x in line])
             f.write(f"{l}\n")
@@ -55,11 +60,12 @@ def precision_recall_curv(gtf, tmap, output_file=None):
 if __name__ == "__main__":
     gtf = sys.argv[1]
     tmap = sys.argv[2]
-    if len(sys.argv) >= 4:
-        output_file = sys.argv[3]
-        precision_recall_curv(gtf, tmap, output_file)
+    attr = sys.argv[3]
+    if len(sys.argv) >= 5:
+        output_file = sys.argv[4]
+        precision_recall_curv(gtf, tmap, attr, output_file)
     else:
-        precision_recall_curv(gtf, tmap)
+        precision_recall_curv(gtf, tmap, attr)
 
 
 
