@@ -45,7 +45,7 @@ done
 # gffcompare
 for i in $(ls  Rand*_run*.pred.gtf PSI*_run*.pred.gtf)
 do
-    gffcomapre -r $truth_gtf -o $eval_output_prefix."${i%.pred.gtf}.eval" $i
+    gffcomapre -r $truth_gtf -o $eval_output_prefix_"${i%.pred.gtf}"_eval $i
 done
 
 
