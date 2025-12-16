@@ -1,4 +1,5 @@
 #!/bin/bash
+set -e
 
 input_gtf=$1
 truth_gtf=$2
