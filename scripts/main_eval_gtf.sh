@@ -12,7 +12,7 @@ psi_file=$tennis_test_dir/"data/PSI_TABLE-dm6.tab"
 tennis_gtf="TENNIS_SATSimple.pred.gtf"
 
 # rerun TENNIS
-tennis test -f SATSimple -m 4 --time_out 900  -x 100 \ 
+tennis test -f SATSimple -m 4 --time_out 900  -x 100 \
     -p 0.0 \
     -o "TENNIS_SATSimple" \
     $input_gtf
@@ -64,7 +64,7 @@ if [ -f $tennis_eval_out ]
 then
     mv $tennis_eval_out $tennis_eval_out".stats"
 fi
-tennis_tmap="$tennis_eval_out"*TENNIS_SATSimple.pred.gtf.tmap
+tennis_tmap=$(echo "$tennis_eval_out"*TENNIS_SATSimple.pred.gtf.tmap)
 
 # score TENNIS by PSI
 tennis test -f ScorePSI \
