@@ -12,6 +12,9 @@ import matplotlib.pyplot as plt
 from collections import defaultdict
 import GTF
 
+# Set global font size
+plt.rcParams.update({'font.size': 16})
+
 
 def parse_gtf(gtf_file):
     """Parse GTF and compute grouping key (first_exon_end, last_intron_start) per transcript."""
@@ -191,7 +194,7 @@ def main():
     max_val1 = max(max(x_total_vals), max(y_vals)) if y_vals else 100
     ax_main1.plot([min_val1, max_val1], [min_val1, max_val1], 'k--', alpha=0.5, label='y = x (100%)')
 
-    for pct, color in [(0.05, 'gray')]:
+    for pct, color in [(0.95, 'gray'), (0.05, 'lightgray')]:
         ax_main1.plot([min_val1, max_val1], [min_val1 * pct, max_val1 * pct],
                 '--', color=color, alpha=0.5, label=f'y = {int(pct*100)}% of x')
 
@@ -205,7 +208,7 @@ def main():
     ax_hist1.hist(all_group_total_cpms, bins=log_bins1, color='gray', alpha=0.7, edgecolor='none')
     ax_hist1.set_xscale('log')
     ax_hist1.set_xlabel('Total transcript group CPM (log scale)')
-    ax_hist1.set_ylabel('Count')
+    ax_hist1.set_ylabel('Count of groups')
 
     plt.tight_layout()
     output_total = f"{base_output}_total.{ext}"
@@ -240,7 +243,7 @@ def main():
     ax_hist2.hist(all_group_avg_cpms, bins=log_bins2, color='gray', alpha=0.7, edgecolor='none')
     ax_hist2.set_xscale('log')
     ax_hist2.set_xlabel('Average transcript group CPM (log scale)')
-    ax_hist2.set_ylabel('Count')
+    ax_hist2.set_ylabel('Count of groups')
 
     plt.tight_layout()
     output_avg = f"{base_output}_average.{ext}"
@@ -256,6 +259,7 @@ def main():
         print(f"  Number of validated TENNIS isoforms plotted: {len(y_vals)}")
         print(f"  Median TENNIS/total ratio: {np.median(ratios_total):.3f}")
         print(f"  Mean TENNIS/total ratio: {np.mean(ratios_total):.3f}")
+        print(f"  TENNIS isoforms >95% of total: {np.sum(ratios_total > 0.95)} ({100*np.sum(ratios_total > 0.95)/len(ratios_total):.1f}%)")
         print(f"  TENNIS isoforms >5% of total: {np.sum(ratios_total > 0.05)} ({100*np.sum(ratios_total > 0.05)/len(ratios_total):.1f}%)")
 
         # Average stats
