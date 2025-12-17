@@ -70,7 +70,7 @@ else:
 plt.xticks(fontsize=14)
 plt.yticks(fontsize=14)
 plt.xlabel('# mathching transcripts', fontsize=16)
-plt.ylabel(r'% matched', fontsize=16)
+plt.ylabel(r'% matching', fontsize=16)
 # plt.title('Precision-Recall Curve', fontsize=18)
 plt.legend(fontsize=12, loc='upper right')  
 
