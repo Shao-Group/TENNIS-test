@@ -100,9 +100,17 @@ python $tennis_test_dir/scripts/precision_recall_by_pctIn.py \
 
 # fig 
 # python /Users/xzang/Work/research_code/tennis-test-public/scripts/precision_recall_fig.py \
-#   x_score.txt \
-#   156.6 24.44 15.17   2.338 \
-#   186.8 20    15.0386 1.6199 \
-#   232 36.2 \
-#   281 30.1 \
-#   dm6.lr.pdf
+#     x_score.both.txt \
+#     179.4 36.08 18.564 3.71\
+#     215.2 29.58 16.857 2.30\
+#     240 48.3 \
+#     292 40.1 \
+#     dm6.rmrtr_1.both.pdf
+
+# python /Users/xzang/Work/research_code/tennis-test-public/scripts/precision_recall_fig.py \
+#     x_score.exact.txt \
+#     108.2 21.78 31.128 6.2729 \
+#     120.6 16.56 13.244 4.04949 \
+#     135 27.2 \
+#     150 20.6 \
+#     dm6.rmrtr_1.exact.pdf
