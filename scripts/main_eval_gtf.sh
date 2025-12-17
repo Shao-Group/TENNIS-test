@@ -96,7 +96,7 @@ python $tennis_test_dir/scripts/precision_recall_by_pctIn.py \
     TENNIS_SAT_psi_score.scored.gtf \
     $tennis_tmap  \
     pctIn_PSI_score  \
-    x_score.txt
+    x_score.$eval_output_prefix.txt
 
 # fig 
 # python /Users/xzang/Work/research_code/tennis-test-public/scripts/precision_recall_fig.py \
