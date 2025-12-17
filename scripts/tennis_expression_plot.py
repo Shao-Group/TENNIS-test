@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """
-Plot validated TENNIS isoform expression vs average transcript group expression.
+Plot validated TENNIS isoform expression vs transcript group expression.
+Generates two plots: one comparing to group total, one comparing to group average.
 """
 
 import argparse
@@ -139,61 +140,131 @@ def main():
             tennis_in_groups[tennis_id] = (group_key, annot_id)
 
     # Compute plot data
-    x_vals = []  # Average group CPM
+    x_avg_vals = []  # Average group CPM (for validated TENNIS isoforms)
+    x_total_vals = []  # Total group CPM (for validated TENNIS isoforms)
     y_vals = []  # TENNIS isoform CPM
+    all_group_avg_cpms = []  # Average CPM for ALL groups (for histogram)
+    all_group_total_cpms = []  # Total CPM for ALL groups (for histogram)
+
+    # Compute average and total CPM for all groups
+    for group_key, transcripts in group_to_transcripts.items():
+        group_cpms = [cpm for _, cpm, _ in transcripts]
+        avg_group_cpm = np.mean(group_cpms)
+        total_group_cpm = np.sum(group_cpms)
+        if avg_group_cpm >= args.min_cpm:
+            all_group_avg_cpms.append(avg_group_cpm)
+        if total_group_cpm >= args.min_cpm:
+            all_group_total_cpms.append(total_group_cpm)
 
     for tennis_id, (group_key, annot_id) in tennis_in_groups.items():
 
         tennis_cpm = avg_cpm[annot_id]  # Use annot_id to look up CPM
 
-        # Average CPM across all isoforms in the group
+        # Average and total CPM across all isoforms in the group
         group_cpms = [cpm for _, cpm, _ in group_to_transcripts[group_key]]
         avg_group_cpm = np.mean(group_cpms)
+        total_group_cpm = np.sum(group_cpms)
 
         if tennis_cpm >= args.min_cpm and avg_group_cpm >= args.min_cpm:
-            x_vals.append(avg_group_cpm)
+            x_avg_vals.append(avg_group_cpm)
+            x_total_vals.append(total_group_cpm)
             y_vals.append(tennis_cpm)
 
-    print(f"Plotting {len(x_vals)} validated TENNIS isoforms...")
+    print(f"Plotting {len(y_vals)} validated TENNIS isoforms...")
 
-    # Plot
-    fig, ax = plt.subplots(figsize=(8, 8))
+    # Determine output filenames
+    base_output = args.output.rsplit('.', 1)[0] if '.' in args.output else args.output
+    ext = args.output.rsplit('.', 1)[1] if '.' in args.output else 'pdf'
 
-    ax.scatter(x_vals, y_vals, alpha=0.5, s=20, c='steelblue', edgecolors='none')
+    # ===== Plot 1: TENNIS vs Group Total =====
+    fig1, (ax_main1, ax_hist1) = plt.subplots(
+        2, 1, figsize=(8, 10),
+        gridspec_kw={'height_ratios': [4, 1], 'hspace': 0.05},
+        sharex=True
+    )
 
-    # Add diagonal line (y = x, meaning TENNIS equals group average)
-    min_val = min(min(x_vals), min(y_vals)) if x_vals else 0.01
-    max_val = max(max(x_vals), max(y_vals)) if x_vals else 100
-    ax.plot([min_val, max_val], [min_val, max_val], 'k--', alpha=0.5, label='y = x (equal to avg)')
+    ax_main1.scatter(x_total_vals, y_vals, alpha=0.5, s=20, c='steelblue', edgecolors='none')
 
-    # Add lines for different ratios
-    for ratio, color in [(2, 'gray'), (0.5, 'lightgray')]:
-        ax.plot([min_val, max_val], [min_val * ratio, max_val * ratio],
-                '--', color=color, alpha=0.5, label=f'y = {ratio}x avg')
+    min_val1 = min(min(x_total_vals), min(y_vals)) if y_vals else 0.01
+    max_val1 = max(max(x_total_vals), max(y_vals)) if y_vals else 100
+    ax_main1.plot([min_val1, max_val1], [min_val1, max_val1], 'k--', alpha=0.5, label='y = x (100%)')
 
-    ax.set_xscale('log')
-    ax.set_yscale('log')
-    ax.set_xlabel('Average transcript group CPM (log scale)')
-    ax.set_ylabel('TENNIS isoform CPM (log scale)')
-    ax.set_title('Validated TENNIS isoform expression vs average group expression')
-    ax.legend(loc='lower right')
+    for pct, color in [(0.5, 'gray'), (0.1, 'lightgray')]:
+        ax_main1.plot([min_val1, max_val1], [min_val1 * pct, max_val1 * pct],
+                '--', color=color, alpha=0.5, label=f'y = {int(pct*100)}% of x')
 
-    # Equal aspect ratio for log-log
-    ax.set_aspect('equal', adjustable='box')
+    ax_main1.set_xscale('log')
+    ax_main1.set_yscale('log')
+    ax_main1.set_ylabel('TENNIS isoform CPM (log scale)')
+    ax_main1.set_title('Validated TENNIS isoform expression vs total group expression')
+    ax_main1.legend(loc='lower right')
+
+    log_bins1 = np.logspace(np.log10(args.min_cpm), np.log10(max(all_group_total_cpms)), 50)
+    ax_hist1.hist(all_group_total_cpms, bins=log_bins1, color='gray', alpha=0.7, edgecolor='none')
+    ax_hist1.set_xscale('log')
+    ax_hist1.set_xlabel('Total transcript group CPM (log scale)')
+    ax_hist1.set_ylabel('Count')
 
     plt.tight_layout()
-    plt.savefig(args.output, dpi=300, bbox_inches='tight')
-    print(f"Saved plot to {args.output}")
+    output_total = f"{base_output}_total.{ext}"
+    plt.savefig(output_total, dpi=300, bbox_inches='tight')
+    plt.close(fig1)
+    print(f"Saved plot to {output_total}")
+
+    # ===== Plot 2: TENNIS vs Group Average =====
+    fig2, (ax_main2, ax_hist2) = plt.subplots(
+        2, 1, figsize=(8, 10),
+        gridspec_kw={'height_ratios': [4, 1], 'hspace': 0.05},
+        sharex=True
+    )
+
+    ax_main2.scatter(x_avg_vals, y_vals, alpha=0.5, s=20, c='steelblue', edgecolors='none')
+
+    min_val2 = min(min(x_avg_vals), min(y_vals)) if y_vals else 0.01
+    max_val2 = max(max(x_avg_vals), max(y_vals)) if y_vals else 100
+    ax_main2.plot([min_val2, max_val2], [min_val2, max_val2], 'k--', alpha=0.5, label='y = x (equal to avg)')
+
+    for ratio, color in [(2, 'gray'), (0.5, 'lightgray')]:
+        ax_main2.plot([min_val2, max_val2], [min_val2 * ratio, max_val2 * ratio],
+                '--', color=color, alpha=0.5, label=f'y = {ratio}x avg')
+
+    ax_main2.set_xscale('log')
+    ax_main2.set_yscale('log')
+    ax_main2.set_ylabel('TENNIS isoform CPM (log scale)')
+    ax_main2.set_title('Validated TENNIS isoform expression vs average group expression')
+    ax_main2.legend(loc='lower right')
+
+    log_bins2 = np.logspace(np.log10(args.min_cpm), np.log10(max(all_group_avg_cpms)), 50)
+    ax_hist2.hist(all_group_avg_cpms, bins=log_bins2, color='gray', alpha=0.7, edgecolor='none')
+    ax_hist2.set_xscale('log')
+    ax_hist2.set_xlabel('Average transcript group CPM (log scale)')
+    ax_hist2.set_ylabel('Count')
+
+    plt.tight_layout()
+    output_avg = f"{base_output}_average.{ext}"
+    plt.savefig(output_avg, dpi=300, bbox_inches='tight')
+    plt.close(fig2)
+    print(f"Saved plot to {output_avg}")
 
     # Print summary statistics
-    if x_vals:
-        ratios = np.array(y_vals) / np.array(x_vals)
-        print(f"\nSummary statistics:")
-        print(f"  Number of validated TENNIS isoforms plotted: {len(x_vals)}")
-        print(f"  Median TENNIS/total ratio: {np.median(ratios):.3f}")
-        print(f"  Mean TENNIS/total ratio: {np.mean(ratios):.3f}")
-        print(f"  TENNIS isoforms >50% of group: {np.sum(ratios > 0.5)} ({100*np.sum(ratios > 0.5)/len(ratios):.1f}%)")
-        print(f"  TENNIS isoforms >10% of group: {np.sum(ratios > 0.1)} ({100*np.sum(ratios > 0.1)/len(ratios):.1f}%)")
+    if y_vals:
+        # Total stats
+        ratios_total = np.array(y_vals) / np.array(x_total_vals)
+        print(f"\nSummary statistics (vs Total):")
+        print(f"  Number of validated TENNIS isoforms plotted: {len(y_vals)}")
+        print(f"  Median TENNIS/total ratio: {np.median(ratios_total):.3f}")
+        print(f"  Mean TENNIS/total ratio: {np.mean(ratios_total):.3f}")
+        print(f"  TENNIS isoforms >50% of total: {np.sum(ratios_total > 0.5)} ({100*np.sum(ratios_total > 0.5)/len(ratios_total):.1f}%)")
+        print(f"  TENNIS isoforms >10% of total: {np.sum(ratios_total > 0.1)} ({100*np.sum(ratios_total > 0.1)/len(ratios_total):.1f}%)")
+
+        # Average stats
+        ratios_avg = np.array(y_vals) / np.array(x_avg_vals)
+        print(f"\nSummary statistics (vs Average):")
+        print(f"  Median TENNIS/avg ratio: {np.median(ratios_avg):.3f}")
+        print(f"  Mean TENNIS/avg ratio: {np.mean(ratios_avg):.3f}")
+        print(f"  TENNIS isoforms > 2x avg: {np.sum(ratios_avg > 2)} ({100*np.sum(ratios_avg > 2)/len(ratios_avg):.1f}%)")
+        print(f"  TENNIS isoforms > avg: {np.sum(ratios_avg > 1)} ({100*np.sum(ratios_avg > 1)/len(ratios_avg):.1f}%)")
+        print(f"  TENNIS isoforms > 0.5x avg: {np.sum(ratios_avg > 0.5)} ({100*np.sum(ratios_avg > 0.5)/len(ratios_avg):.1f}%)")
 
 
 if __name__ == '__main__':
