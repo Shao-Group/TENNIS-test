@@ -30,11 +30,13 @@ norm = colors.Normalize(vmin=min(pctIn), vmax=max(pctIn))
 for i, (x, y, val) in enumerate(zip(recall, precision, pctIn)):
     if val < 0.5:  # circle
         plt.plot(x, y, 'o', color='black', fillstyle='none', markersize=10)
+        print(f"pctIn < 0.5: recall={x}, precision={y}, pctIn={val}, outputName={outputName}")
         break
 
 for i, (x, y, val) in enumerate(zip(recall, precision, pctIn)):
     if val < 0.3333:  # circle
         plt.plot(x, y, 'o', color='black', fillstyle='none', markersize=10)
+        print(f"pctIn < 0.3333: recall={x}, precision={y}, pctIn={val}, outputName={outputName}")
         break
 
 plt.scatter(recall, precision, c=pctIn, cmap=custom_cmap, norm=norm, marker='.', s=1)
