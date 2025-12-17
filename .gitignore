@@ -40,7 +40,6 @@ configure~
 .vscode/
 gene.*.tex
 *.dot
-*.tex
 *.o
 *.a
 *.Po
