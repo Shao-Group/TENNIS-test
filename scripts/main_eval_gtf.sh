@@ -12,10 +12,14 @@ psi_file=$tennis_test_dir/"data/PSI_TABLE-dm6.tab"
 tennis_gtf="TENNIS_SATSimple.pred.gtf"
 
 # rerun TENNIS
-tennis test -f SATSimple -m 4 --time_out 900  -x 100 \
-    -p 0.0 \
-    -o "TENNIS_SATSimple" \
-    $input_gtf
+if [ -f $tennis_gtf ]; then
+    echo "$tennis_gtf exists, skip TENNIS run"
+else
+    tennis test -f SATSimple -m 4 --time_out 900  -x 100 \
+        -p 0.0 \
+        -o "TENNIS_SATSimple" \
+        $input_gtf
+fi
 
 
 # 5 randoms
@@ -25,23 +29,35 @@ do
     if [[ $i -eq 1 ]]; then
         seed=""
     fi 
-    tennis test -f Random1 -x 100 \
-        -p 0.0 \
-        -o Rand1_run"$i" \
-        $seed \
-        --xi_gtf_file $tennis_gtf \
-        $input_gtf
-    tennis test -f RandomX -x 100 \
-        -p 0.0 \
-        -o RandX_run"$i" \
-        $seed \
-        --xi_gtf_file $tennis_gtf \
-        $input_gtf
+    if [ -f "Rand1_run$i.pred.gtf" ]; then
+        echo "Rand1_run$i.pred.gtf exists, skip"
+    else
+        tennis test -f Random1 -x 100 \
+            -p 0.0 \
+            -o Rand1_run"$i" \
+            $seed \
+            --xi_gtf_file $tennis_gtf \
+            $input_gtf
+    fi
+    if [ -f "RandX_run$i.pred.gtf" ]; then
+        echo "RandX_run$i.pred.gtf exists, skip"
+    else
+        tennis test -f RandomX -x 100 \
+            -p 0.0 \
+            -o RandX_run"$i" \
+            $seed \
+            --xi_gtf_file $tennis_gtf \
+            $input_gtf
+    fi
 done
 
 # PSI1 and PSIX
 for j in "1" "X"
 do
+    if [ -f "PSI${j}.pred.gtf" ]; then
+        echo "PSI${j}.pred.gtf exists, skip"
+        continue
+    fi
     tennis test -f PSI"$j" \
         -x 100 -p 0.0 \
         -o PSI"$j" \
