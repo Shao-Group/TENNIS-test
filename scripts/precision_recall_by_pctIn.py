@@ -25,11 +25,11 @@ def get_class_code(tmap):
     f.close()
     return tid2class_code
 
-def precision_recall_curv(gtf, tmap, attr_name, output_file=None):
+def precision_recall_curv(gtf, tmap, attr_name, output_file=None, filter_k=None, filter_v=None):
     if attr_name == 'pctIn_PSI_score':
-        tid2attr = get_attr(gtf, 'PctIn', 'PSI_score')
+        tid2attr = get_attr(gtf, 'PctIn', 'PSI_score', filter_k=filter_k, filter_v=filter_v)
     else:
-        tid2attr = get_attr(gtf, attr_name)
+        tid2attr = get_attr(gtf, attr_name, filter_k=filter_k, filter_v=filter_v)
     tid2class_code = get_class_code(tmap)
 
     sorted_tid2attr = sorted(tid2attr.items(), key=lambda x: x[1], reverse=True)
@@ -61,7 +61,11 @@ if __name__ == "__main__":
     gtf = sys.argv[1]
     tmap = sys.argv[2]
     attr = sys.argv[3]
-    if len(sys.argv) >= 5:
+    if len(sys.argv) >= 6:
+        output_file = sys.argv[4]
+        filter_k, filter_v = sys.argv[5].split('=')
+        precision_recall_curv(gtf, tmap, attr, output_file, filter_k, filter_v)
+    elif len(sys.argv) >= 5:
         output_file = sys.argv[4]
         precision_recall_curv(gtf, tmap, attr, output_file)
     else:
