@@ -192,9 +192,8 @@ def main():
 
     min_val1 = min(min(x_total_vals), min(y_vals)) if y_vals else 0.01
     max_val1 = max(max(x_total_vals), max(y_vals)) if y_vals else 100
-    ax_main1.plot([min_val1, max_val1], [min_val1, max_val1], 'k--', alpha=0.5, label='y = x (100%)')
 
-    for pct, color in [(0.95, 'gray'), (0.05, 'lightgray')]:
+    for pct, color in [(0.95, 'black'), (0.05, 'lightgray')]:
         ax_main1.plot([min_val1, max_val1], [min_val1 * pct, max_val1 * pct],
                 '--', color=color, alpha=0.5, label=f'y = {int(pct*100)}% of x')
 
