@@ -67,8 +67,8 @@ def setup_tennis_import(tennis_path):
     tennisSrcDir = os.path.dirname(tennisSrc)
     sys.path.insert(0, tennisSrcDir)
 
-    from tennis import Transcriptom
-    return Transcriptom
+    from tennis import Transcriptome
+    return Transcriptome
 
 
 def remove_isoforms(matrix, matrix_gids, num_removal):
@@ -182,14 +182,14 @@ def main():
         random.seed(args.seed)
 
     # Setup tennis import
-    Transcriptom = setup_tennis_import(args.tennis)
+    Transcriptome = setup_tennis_import(args.tennis)
 
     # Create output directory
     os.makedirs(args.output_dir, exist_ok=True)
 
     # Load transcriptome
     save_basename = os.path.join(args.output_dir, args.output_prefix)
-    tsm = Transcriptom(
+    tsm = Transcriptome(
         args.refgtf,
         f'{save_basename}_tmp.stats',
         f'{save_basename}_tmp.pred.gtf'
