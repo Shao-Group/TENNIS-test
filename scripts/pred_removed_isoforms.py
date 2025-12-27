@@ -141,13 +141,18 @@ def remove_isoforms(matrix, matrix_gids, num_removal):
             for iso in removed_from_group:
                 removed_transcripts.append((group_id, iso))
             remaining_transcripts.append((group_id, group_isoforms))
-            considered_gene_count += 1
+            considered_gene_count += 1 
 
     return removed_transcripts, remaining_transcripts, considered_gene_count
 
 
 def save_gtf_files(tsm, removed_transcripts, remaining_transcripts, output_dir, output_prefix):
     """Save removed and remaining transcripts to GTF files"""
+    # Assert no overlap between removed and remaining transcripts
+    removed_chains = {tuple(chain) for gid, chain in removed_transcripts}
+    remaining_chains = {tuple(chain) for gid, chains_list in remaining_transcripts for chain in chains_list}
+    assert removed_chains.isdisjoint(remaining_chains), "Overlap found between removed and remaining transcripts!"
+
     os.makedirs(output_dir, exist_ok=True)
     save_basename = os.path.join(output_dir, output_prefix)
 
