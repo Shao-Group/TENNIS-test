@@ -91,9 +91,22 @@ def remove_isoforms(matrix, matrix_gids, num_removal):
     # (keep at least 2 remaining, and can't remove shortest)
     min_isoforms_required = num_removal + 2
 
+    # Track duplicate count for reporting
+    total_duplicates_removed = 0
+
     for idx in range(len(matrix)):
         group_id = matrix_gids[idx]
-        group_isoforms = list(matrix[idx])  # Make a copy to avoid modifying original
+
+        # Deduplicate isoforms within the group
+        seen_chains = set()
+        group_isoforms = []
+        for iso in matrix[idx]:
+            chain_tuple = tuple(iso)
+            if chain_tuple not in seen_chains:
+                seen_chains.add(chain_tuple)
+                group_isoforms.append(iso)
+            else:
+                total_duplicates_removed += 1
 
         if len(group_isoforms) < min_isoforms_required:
             continue
@@ -142,6 +155,9 @@ def remove_isoforms(matrix, matrix_gids, num_removal):
                 removed_transcripts.append((group_id, iso))
             remaining_transcripts.append((group_id, group_isoforms))
             considered_gene_count += 1 
+
+    if total_duplicates_removed > 0:
+        print(f"Warning: Removed {total_duplicates_removed} duplicate isoforms from input")
 
     return removed_transcripts, remaining_transcripts, considered_gene_count
 
