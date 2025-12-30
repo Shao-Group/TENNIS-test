@@ -153,6 +153,7 @@ def remove_isoforms(matrix, matrix_gids, num_removal):
         if len(removed_from_group) == num_removal:
             for iso in removed_from_group:
                 removed_transcripts.append((group_id, iso))
+                print(f"Removed isoform with {len(iso)} exons from gene {group_id}")
             remaining_transcripts.append((group_id, group_isoforms))
             considered_gene_count += 1 
 
