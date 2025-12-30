@@ -151,9 +151,7 @@ def remove_isoforms(matrix, matrix_gids, num_removal):
 
         # Only count this gene if we successfully removed the desired number
         if len(removed_from_group) == num_removal:
-            for iso in removed_from_group:
-                removed_transcripts.append((group_id, iso))
-                print(f"Removed isoform {iso} exons from gene {group_id}")
+            removed_transcripts.append((group_id, removed_from_group))
             remaining_transcripts.append((group_id, group_isoforms))
             considered_gene_count += 1 
 
@@ -166,7 +164,7 @@ def remove_isoforms(matrix, matrix_gids, num_removal):
 def save_gtf_files(tsm, removed_transcripts, remaining_transcripts, output_dir, output_prefix):
     """Save removed and remaining transcripts to GTF files"""
     # Assert no overlap between removed and remaining transcripts
-    removed_chains = {tuple(chain) for gid, chain in removed_transcripts}
+    removed_chains = {tuple(chain) for gid, chains_list in removed_transcripts for chain in chains_list}
     remaining_chains = {tuple(chain) for gid, chains_list in remaining_transcripts for chain in chains_list}
     assert removed_chains.isdisjoint(remaining_chains), "Overlap found between removed and remaining transcripts!"
 
@@ -189,10 +187,9 @@ def save_gtf_files(tsm, removed_transcripts, remaining_transcripts, output_dir, 
         print(f"{removed_file} exists. Removing it")
         os.remove(removed_file)
 
-    for gid, chain in removed_transcripts:
-        gchains = [chain]  # Put transcript in a gene
+    for gid, chains in removed_transcripts:
         info = dict()
-        tsm.save_novel_gene_in_gtf(gchains, info, gid, "pexon_chain", addlN=1, file=removed_file)
+        tsm.save_novel_gene_in_gtf(chains, info, gid, "pexon_chain", addlN=len(chains), file=removed_file)
 
     return remaining_file, removed_file
 
