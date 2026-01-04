@@ -43,11 +43,11 @@ def select_row(group):
 def main():
     parser = argparse.ArgumentParser(description='Plot histogram of inframe_length_pi')
     parser.add_argument('--gtf', type=str, help='Optional GTF file to split by class_code')
-    parser.add_argument('--gtf', type=str, help='Optional GTF file to split by class_code')
+    parser.add_argument('input', type=str, help='Input TSV file (e.g., orf.tsv)')
     args = parser.parse_args()
 
     # Read the TSV file
-    df = pd.read_csv('orf.tsv', sep='\t')
+    df = pd.read_csv(args.input, sep='\t')
 
     # For each query_id, select one entry
     selected = df.groupby('query_id').apply(select_row).reset_index(drop=True)
