@@ -63,21 +63,33 @@ def main():
         matched = selected[selected['class_code'] == '=']
         not_matched = selected[selected['class_code'] != '=']
 
-        # Create two subplots
-        fig, axes = plt.subplots(1, 2, figsize=(14, 6))
+        bins = list(range(0, 105, 5))
+        xticks = list(range(0, 110, 10))
 
-        axes[0].hist(matched['inframe_length_pi'], bins=50, edgecolor='black', alpha=0.7, color='green')
-        axes[0].set_xlabel('inframe_length_pi')
-        axes[0].set_ylabel('Count')
-        axes[0].set_title(f'Matched (class_code = "=") [n={len(matched)}]')
-
-        axes[1].hist(not_matched['inframe_length_pi'], bins=50, edgecolor='black', alpha=0.7, color='orange')
-        axes[1].set_xlabel('inframe_length_pi')
-        axes[1].set_ylabel('Count')
-        axes[1].set_title(f'Not Matched (class_code != "=") [n={len(not_matched)}]')
-
+        # Matched plot
+        fig1, ax1 = plt.subplots(figsize=(10, 6))
+        ax1.hist(pd.to_numeric(matched['inframe_length_pi'], errors='coerce').fillna(0), bins=bins,  range=[0,100], edgecolor='black', alpha=0.7, color='green', weights=[100/len(matched)]*len(matched))
+        ax1.set_xlabel('inframe_length_pi')
+        ax1.set_ylabel('Percentage (%)')
+        ax1.set_title(f'Matched (class_code = "=") [n={len(matched)}]')
+        ax1.set_xticks(xticks)
+        ax1.set_xlim(0, 100)
+        ax1.set_ylim(0, 100)
         plt.tight_layout()
-        plt.savefig('inframe_length_pi_histogram_by_class.png', dpi=150)
+        plt.savefig('inframe_length_pi_histogram_matched.pdf', dpi=150)
+        plt.show()
+
+        # Not matched plot
+        fig2, ax2 = plt.subplots(figsize=(10, 6))
+        ax2.hist(pd.to_numeric(not_matched['inframe_length_pi'], errors='coerce').fillna(0), bins=bins, range=[0,100], edgecolor='black', alpha=0.7, color='orange', weights=[100/len(not_matched)]*len(not_matched))
+        ax2.set_xlabel('inframe_length_pi')
+        ax2.set_ylabel('Percentage (%)')
+        ax2.set_title(f'Not Matched (class_code != "=") [n={len(not_matched)}]')
+        ax2.set_xticks(xticks)
+        ax2.set_xlim(0, 100)
+        ax2.set_ylim(0, 100)
+        plt.tight_layout()
+        plt.savefig('inframe_length_pi_histogram_not_matched.pdf', dpi=150)
         plt.show()
 
         print(f"Total unique query_ids: {len(selected)}")
@@ -86,13 +98,18 @@ def main():
         print(f"\nNot Matched summary:\n{not_matched['inframe_length_pi'].describe()}")
     else:
         # Single histogram (original behavior)
-        plt.figure(figsize=(10, 6))
-        plt.hist(selected['inframe_length_pi'], bins=50, edgecolor='black', alpha=0.7)
-        plt.xlabel('inframe_length_pi')
-        plt.ylabel('Count')
-        plt.title('Distribution of inframe_length_pi (one per query_id)')
+        fig, ax = plt.subplots(figsize=(10, 6))
+        bins = list(range(0, 105, 5))
+        xticks = list(range(0, 110, 10))
+        ax.hist(pd.to_numeric(selected['inframe_length_pi'], errors='coerce').fillna(0), bins=bins, edgecolor='black', alpha=0.7, weights=[100/len(selected)]*len(selected))
+        ax.set_xlabel('inframe_length_pi')
+        ax.set_ylabel('Percentage (%)')
+        ax.set_title('Distribution of inframe_length_pi (one per query_id)')
+        ax.set_xticks(xticks)
+        ax.set_xlim(0, 100)
+        ax.set_ylim(0, 100)
         plt.tight_layout()
-        plt.savefig('inframe_length_pi_histogram.png', dpi=150)
+        plt.savefig('inframe_length_pi_histogram.pdf', dpi=150)
         plt.show()
 
         print(f"Total unique query_ids: {len(selected)}")
