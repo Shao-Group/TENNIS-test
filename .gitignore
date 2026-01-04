@@ -92,3 +92,4 @@ config.h.in~
 *.stats
 programs/*
 Analyses/*
+scripts/GTF.py
